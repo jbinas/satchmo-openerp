@@ -1,0 +1,8 @@
+
+TODO:
+
+ - Make sure the billing addressee is copied to the addressee field of the shipping address if not specified (this is currently used as 'name' in OE 'res.partner' and will raise an exception if not specified)
+
+ - Create cron to send email if dirty mappers are found in ObjMappers
+
+ - Extend mapping framework to be able to receive objects from OpenErp

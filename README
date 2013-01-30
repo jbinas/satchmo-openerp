@@ -1,0 +1,63 @@
+
+
+Jeame Media OESync
+Jonathan Binas, www.jeame.com
+
+
+This app connects Satchmo to OpenERP and synchronizes specific models via XML-RPC.
+Besides synchronization of products, categories and addresses, this allows the automatic creation of orders, invoices, and payments in OpenErp. The mapping is fully customizable and can be altered to suit your needs.
+
+In the current version, the synchronization is unidirectional (Satchmo -> OpenERP). The other direction should follow soon, though.
+
+
+
+INSTALL
+=======
+
+Required Python packages:
+
+- Intall the OpenERP client library for python, e.g.
+  easy_install openerp-client-lib
+
+
+Required OpenERP addons:
+
+- Install the m2m_categories addon from the extras package for OpenERP
+  (this is not yet available for OpenERP 7 and has to be patched as follows
+  before installing:
+  
+  change the following line in 'product_view.xml'
+  <xpath expr="/form/notebook/page[@string='Information']" position="after">
+
+  to
+  <xpath expr="/form/sheet/notebook/page[@string='Information']" position="after">
+
+  NOTE: this line occurs twice. Only change the FIRST occurence.)
+
+
+Installing the Satchmo app
+
+- Add 'oesync' to your INSTALLED_APPS in the Satchmo settings.
+
+- Add oesync settings to your local_settings.py:
+
+  OPENERP_SETTINGS = {
+      'HOST' : 'your.openerp.server',
+      'PORT' : 8069,
+      'DB' : 'YourOpenErpDB',
+      'USER' : 'username',
+      'PASSWORD' : 'password',
+      'ORDER_ACTION': True, #This enables automatic creation of orders and payments
+      'CURRENCY_ID': 1, #OpenErp currency id to be used
+      'ACCOUNT_ID': 1836, #OpenErp account id new invoices shall be associated with
+      'JOURNAL_ID': 20, #OpenErp journal id new invoices shall be associated with
+  }
+
+
+
+CONFIGURATION
+=============
+
+In its standard configuration, oesync synchronizes AddressBook, Organization, Country, Category, Product, Order and OrderItem objects. However, the mapping of Satchmo models to OpenErp models is flexible and can be fully customized in 'mapping_config.py'.
+
+See 'mapping_config.py' for details.
