@@ -22,20 +22,13 @@ Required Python packages:
 
 Required OpenERP addons:
 
-- Install the m2m_categories addon from the extras package for OpenERP
-  (this is not yet available for OpenERP 7 and has to be patched as follows
-  before installing:
-  
-  change the following line in 'product_view.xml'
-  <xpath expr="/form/notebook/page[@string='Information']" position="after">
-
-  to
-  <xpath expr="/form/sheet/notebook/page[@string='Information']" position="after">
-
-  NOTE: this line occurs twice. Only change the FIRST occurence.)
+- Install the product_m2mcategories addon
+  A modified version of the addon for OE 7 is included in this package
 
 
 Installing the Satchmo app
+
+- Copy oesync to your store directory
 
 - Add 'oesync' to your INSTALLED_APPS in the Satchmo settings.
 
@@ -61,3 +54,10 @@ CONFIGURATION
 In its standard configuration, oesync synchronizes AddressBook, Organization, Country, Category, Product, Order and OrderItem objects. However, the mapping of Satchmo models to OpenErp models is flexible and can be fully customized in 'mapping_config.py'.
 
 See 'mapping_config.py' for details.
+
+
+
+USAGE
+=====
+
+If configured correctly, everything specified in the mapping should be synced automatically. Synced objects are kept track of in the ObjMapper model (accessible via the admin). If things go wrong, the relevant objects are marked as 'dirty'. Future versions of this app should send emails to notify users of failed synchronizations.
