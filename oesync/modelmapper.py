@@ -44,9 +44,13 @@ class ModelMapper:
             #return mappings only (no special tags)
             return self.get_children(mapping)
         except KeyError:
-            log.error('No mapping could be found for model \'%s\'' % satchmo_model)
+            log.warning('No mapping could be found for model \'%s\'' % satchmo_model)
             return {}
             #raise MappingError('There is no mapping for this model')
+
+    def get_model(self, model_name):
+        return ContentType.objects.get(model=model_name.lower()).model_class()
+        #TODO: add exception here
 
     def get_for_oerp_model(self, oerp_model=None):
         '''

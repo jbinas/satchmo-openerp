@@ -1,4 +1,3 @@
-from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django.db.models.signals import pre_delete, post_save
 from oesync.signals import post_save_all
@@ -12,15 +11,16 @@ from oesync.modelmapper import ModelMapper
 _contain_inline = ModelMapper.access_inline
 
 _objmap_models = [
-    ContentType.objects.get(model=model_name.lower()).model_class() \
-    for model_name in ModelMapper.mapping.keys() if model_name not in _contain_inline]
+    ModelMapper.get_model(model_name) for model_name in ModelMapper.mapping.keys() \
+    if model_name not in _contain_inline
+    ]
 
 _objmap_models_inline = [
-    ContentType.objects.get(model=model_name.lower()).model_class() \
-    for model_name in _contain_inline]
+    ModelMapper.get_model(model_name) for model_name in _contain_inline
+    ]
 
 
-# Signal registering.
+# Signal registration
 def _reg_signal(signal, method):
     '''Return method for registering signals.'''
     def _method(model):

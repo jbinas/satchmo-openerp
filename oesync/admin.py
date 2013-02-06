@@ -1,9 +1,13 @@
 from django.contrib import admin
+from django.contrib import messages
 from oesync.models import ObjMapper, DeletedObjMapper
 from oesync.modelmapper import ModelMapper
 from oesync.signals import post_save_all
+from oesync.listeners import syncnow
 from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import ugettext_lazy as _
 import re
+
 
 
 #import admin classes to be patched
@@ -24,15 +28,24 @@ for model_name in ModelMapper.access_inline:
 
 
 
+def _sync_selected(modeladmin, request, queryset):
+    ''' Admin action to sync selected objects '''
+    if syncnow(queryset=queryset):
+        messages.info(request, _('%s objects were successfully synced.' % len(queryset)))
+    else:
+        messages.error(request, _('An error occured. Not all objects could be synced.'))
+_sync_selected.short_description = _('Synchronize selected objects')
+
+
 class ObjMapperAdmin(admin.ModelAdmin):
-    list_display = ('object','content_type', 'object_id', 'oerp_model', 'oerp_id', 'is_dirty')
+    list_display = ('object','content_type', 'object_id', 'parent', 'oerp_model', 'oerp_id', 'is_dirty')
     list_display_links = ('object', 'content_type')
     list_filter = ('content_type', )
+    actions = ['sync_selected']
+    sync_selected = _sync_selected
     #search_fields = ['object', 'content_type']
     #ordering = ['site', 'parent__id', 'ordering', 'name']
-    #inlines = [CategoryImage_Inline]
     #if config_value('LANGUAGE','SHOW_TRANSLATIONS'):
-    #    inlines.append(CategoryTranslation_Inline)
     #filter_vertical = ('content_type',)
 
 admin.site.register(ObjMapper, ObjMapperAdmin)
@@ -40,15 +53,11 @@ admin.site.register(ObjMapper, ObjMapperAdmin)
 
 
 class DeletedObjMapperAdmin(admin.ModelAdmin):
-    list_display = ('content_type', 'oerp_model', 'oerp_id', 'is_dirty')
+    list_display = ('content_type', 'parent', 'oerp_model', 'oerp_id', 'is_dirty')
     list_display_links = ('oerp_model', 'oerp_id')
     list_filter = ('content_type', )
-    #search_fields = ['object', 'content_type']
-    #ordering = ['site', 'parent__id', 'ordering', 'name']
-    #inlines = [CategoryImage_Inline]
-    #if config_value('LANGUAGE','SHOW_TRANSLATIONS'):
-    #    inlines.append(CategoryTranslation_Inline)
-    #filter_vertical = ('content_type',)
+    actions = ['sync_selected']
+    sync_selected = _sync_selected
 
 admin.site.register(DeletedObjMapper, DeletedObjMapperAdmin)
 
