@@ -62,18 +62,18 @@ class Oerp():
 
     def _validate_model(self, model=None):
         if self.model is None:
-            raise OerpSyncFailed('No model was provided')
+            raise OerpSyncFailed(self, 'No model was provided')
         if model:
             if model != self.model.model_name:
-                raise OerpSyncFailed('This method is only available for \'%s\'' % model)
+                raise OerpSyncFailed(self, 'This method is only available for \'%s\'' % model)
 
     def _validate_data(self, data):
         if data is None:
-            raise OerpSyncFailed('No data was provided')
+            raise OerpSyncFailed(self, 'No data was provided')
 
     def _validate_existence(self):
         if self.exists is False:
-            raise OerpSyncFailed('This object does not exist (id %s)' % self.id)
+            raise OerpSyncFailed(self, 'This object does not exist')
 
 
 
@@ -83,11 +83,11 @@ class Oerp():
         '''
         self._validate_model()
         try:
-            log.info('Deleting from %s (%s)' % (self.model.model_name, self.id))
+            log.debug('Deleting %s' % self)
             self.model.unlink([self.id])
-            log.debug('Done.')
+            log.debug('Deleted object %s' % self)
         except:
-            raise OerpSyncFailed(model=self.model, id=self.id)
+            raise OerpSyncFailed(self, 'The object could not be deleted')
         return True
 
 
@@ -98,14 +98,14 @@ class Oerp():
         self._validate_model()
         self._validate_data(data)
         try:
-            log.info('Creating in %s...' % self.model.model_name)
-            log.debug(str(data))
+            log.debug('Creating in %s...' % self)
+            #log.debug('Data: %s' % str(data))
             id = self.model.create(data)
             self.set_id(id)
-            log.debug('Done.')
-        except Exception as e:
+            log.debug('Created object %s' % self)
+        except Exception as errmsg:
             self.set_id(None)
-            raise OerpSyncFailed('Creation failed (improper data?): %s' % e)
+            raise OerpSyncFailed(self, 'Creation failed, possibly due to an invalid value. OpenERP server response: %s' % errmsg)
         return True
 
 
@@ -116,12 +116,12 @@ class Oerp():
         self._validate_model()
         self._validate_existence()
         try:
-            log.info('Updating %s (%s)...' % (self.model.model_name, self.id))
-            log.debug(str(data))
+            log.debug('Updating %s...' % self)
+            #log.debug('Data: %s' % str(data))
             self.model.write(self.id, data)
-            log.debug('Done.')
+            log.debug('Updated %s' % self)
         except:
-            raise OerpSyncFailed('Update failed')
+            raise OerpSyncFailed(self, 'Update failed')
         return True
 
     def confirm_order(self):
@@ -131,11 +131,11 @@ class Oerp():
         self._validate_model('sale.order')
         self._validate_existence()
         try:
-            log.info('Confirming %s (%s)...' % (self.model.model_name, self.id))
+            log.debug('Confirming %s...' % self)
             self.model.action_button_confirm([self.id])
-            log.debug('Done.')
+            log.debug('Confirmed %s' % self)
         except Exception as e:
-            raise OerpSyncFailed('Update failed: %s' % e)
+            raise OerpSyncFailed(self, 'Update failed. OE server response: %s' % e)
         return True
 
     def add_payment(self, partner_id, account_id, journal_id, period_id, amount,
@@ -182,12 +182,12 @@ class Oerp():
 
             #create and validate voucher
             self.create(vals)
-            log.info('Validating payment')
+            log.debug('Validating payment %s' % self)
             self.model.button_proforma_voucher([self.id])
-            log.debug('Done.')
+            log.debug('Validated %s' % self)
 
         except Exception as e:
-            raise OerpSyncFailed('Could not add payment. %s' % e)
+            raise OerpSyncFailed(self, 'Could not add payment. OE server response: %s' % e)
 
 
 
@@ -200,7 +200,7 @@ class Oerp():
         try:
             return self.model.read(self.id, fields)
         except Exception as e:
-            raise OerpSyncFailed('Reading failed: %s' % e)
+            raise OerpSyncFailed(self, 'Could not read value. OE server response: %s' % e)
 
     def validate_invoice(self, invoice_id):
         self._validate_model('account.invoice.confirm')
@@ -208,18 +208,30 @@ class Oerp():
             #call invoice validation workflow
             return self.model.invoice_confirm([], {'active_ids': [invoice_id],})
         except Exception as e:
-            raise OerpSyncFailed('Validation failed: %s' % e)
+            raise OerpSyncFailed(self, 'Validation failed. OE server response: %s' % e)
+
+
+
+
+    def __repr__(self):
+        if self.id:
+            return '<OpenErp Object: %s (%s)>' % (self.model_name, self.id)
+        else:
+            return '<OpenErp Model: %s>' % self.model_name
+
+    def __str__(self):
+        return self.__repr__()
+
 
 
 
 
 class OerpSyncFailed(Exception):
-    def __init__(self, msg='', model='unknown model', id='unknown id'):
-        self.model = model
-        self.id = id
+    def __init__(self, oerp_obj, msg=None):
+        self.oerp_obj = oerp_obj
         self.msg = msg
     def __str__(self):
         if self.msg:
-            return self.msg
+            return '%s: %s' % (self.oerp_obj, self.msg)
         else:
-            return str('%s (%s) could not be synced') % (self.model.model_name,self.id)
+            return '%s: An error occured. Sync failed.' % self.oerp_obj

@@ -99,12 +99,11 @@ class ModelMapper:
                     if action in satchmo_field.actions:
                         #get field data
                         data[oerp_field] = satchmo_field.get_content(instance, oerp_model)
-                except KeyError:
-                    raise MappingError('This field does not exist: %s' % satchmo_field)
                 except Exception as e:
-                    raise MappingError('An error occured while mapping content of %s: %s'\
-                            % (oerp_field, e))
-        return [data, children]
+                    raise MappingError(
+                        'An error occured while mapping content %s: %s -- %s' % \
+                        (oerp_field, satchmo_field, e))
+        return (data, children)
 
     def check_auto_del(self, mapping):
         ''' Check whether a (child) object can be deleted '''

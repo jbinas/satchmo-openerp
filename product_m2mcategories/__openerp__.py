@@ -17,8 +17,8 @@
 
 {
     "name" : "Product - Many Categories",
-    "version" : "1.0.2",
-    "author" : "Sharoon Thomas",
+    "version" : "1.0.2.1",
+    "author" : "Sharoon Thomas (modifications by Jonathan Binas)",
     "website" : "",
     "category" : "Added functionality",
     "depends" : ['base','product'],

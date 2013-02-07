@@ -1,6 +1,7 @@
 
 
-Jeame Media OESync 0.1
+Jeame Media OESync 0.1.2
+
 Jonathan Binas, www.jeame.com
 
 
@@ -40,7 +41,7 @@ Installing the Satchmo app
       'DB' : 'YourOpenErpDB',
       'USER' : 'username',
       'PASSWORD' : 'password',
-      'ORDER_ACTION': True, #This enables automatic creation of orders and payments
+      'MODE': 'live', #Set this to 'live', or 'manual' (see Usage section below)
       'CURRENCY_ID': 1, #OpenErp currency id to be used
       'ACCOUNT_ID': 1836, #OpenErp account id new invoices shall be associated with
       'JOURNAL_ID': 20, #OpenErp journal id new invoices shall be associated with
@@ -60,4 +61,11 @@ See 'mapping_config.py' for details.
 USAGE
 =====
 
-If configured correctly, everything specified in the mapping should be synced automatically. Synced objects are kept track of in the ObjMapper model (accessible via the admin). If things go wrong, the relevant objects are marked as 'dirty'. Future versions of this app should send emails to notify users of failed synchronizations.
+If 'MODE' is set to 'live', all models specified in the mapping are synced automatically whenever they change. Setting 'MODE' to 'manual' allows to trigger the synchronization manually via the admin or a cron.
+Synced objects are kept track of in the ObjMapper model (accessible via the admin). If things go wrong, the relevant objects are marked as 'dirty'. Individual objects can be synced in the admin via the 'Sync selected objects' action. 
+To trigger synchronization of all unsynced objects manually (e.g. by a cron) do the following:
+
+    from oesync.listeners import syncnow
+    syncnow()
+
+Future versions of this app should send emails to notify users of failed synchronizations.

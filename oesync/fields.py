@@ -16,8 +16,11 @@ class GetField(object):
         self.actions = actions
         self.default = default
 
+    def __repr__(self):
+        return u'<%s: %s>' % (self.__class__.__name__, self.attr_name)
+
     def __str__(self):
-        return self.attr_name
+        return self.__repr__()
 
     def _check(self, value):
         ''' convert empty strings/None to False (NoneType is not supported in XMLRPC)'''

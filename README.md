@@ -1,7 +1,8 @@
 satchmo-openerp
 ===============
 
-OESync 0.1
+OESync 0.1.2
+
 An OpenERP connector for Satchmo
 
 

@@ -42,11 +42,11 @@ class ObjMapperAdmin(admin.ModelAdmin):
     list_display_links = ('object', 'content_type')
     list_filter = ('content_type', )
     actions = ['sync_selected']
-    sync_selected = _sync_selected
-    #search_fields = ['object', 'content_type']
-    #ordering = ['site', 'parent__id', 'ordering', 'name']
+    search_fields = ['content_type', 'oerp_model']
+    ordering = ['-is_dirty']
     #if config_value('LANGUAGE','SHOW_TRANSLATIONS'):
     #filter_vertical = ('content_type',)
+    sync_selected = _sync_selected
 
 admin.site.register(ObjMapper, ObjMapperAdmin)
 
@@ -57,6 +57,8 @@ class DeletedObjMapperAdmin(admin.ModelAdmin):
     list_display_links = ('oerp_model', 'oerp_id')
     list_filter = ('content_type', )
     actions = ['sync_selected']
+    ordering = ['-is_dirty']
+    search_fields = ['content_type', 'oerp_model']
     sync_selected = _sync_selected
 
 admin.site.register(DeletedObjMapper, DeletedObjMapperAdmin)

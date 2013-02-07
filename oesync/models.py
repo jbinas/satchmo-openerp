@@ -36,15 +36,9 @@ class ObjMapper(models.Model):
     '''
 
     date_created = models.DateTimeField(
-        _('date created'), default=models.datetime.datetime.now(), null=False,
-        blank=False)
+        _('date created'), auto_now_add=True, null=False)
     date_modified = models.DateTimeField(
-        _('date modified'), default=models.datetime.datetime.now(),
-        null=False, blank=False)
-    timestamp_created = models.BigIntegerField(
-        _('timestamp created'), default = time.time()*1e6, null=False)
-    timestamp_modified = models.BigIntegerField(
-        _('timestamp modified'), default = time.time()*1e6, null=False)
+        _('date modified'), auto_now=True, null=False)
     is_dirty = models.BooleanField(default=True)
     oerp_id = models.PositiveIntegerField(
         _('OpenERP Id'), null=True, blank=True)
@@ -55,20 +49,14 @@ class ObjMapper(models.Model):
     object = generic.GenericForeignKey('content_type', 'object_id')
     objects = ObjMapperManager()
 
+    sync_now = False
+
     def save_state(self, state='dirty'):
         if state is 'dirty':
             self.is_dirty = True
         else:
             self.is_dirty = False
         self.save()
-
-    def save(self, *args, **kwargs):
-        ''' Update timestamp '''
-        if not self.id:
-            self.timestamp_created = time.time()*1e6
-        self.timestamp_modified = time.time()*1e6
-        super(ObjMapper, self).save(*args, **kwargs)
-
 
     class Meta:
         verbose_name = _('Object Mapper')
@@ -86,15 +74,9 @@ class DeletedObjMapper(models.Model):
     '''
 
     date_created = models.DateTimeField(
-        _('date created'), default=models.datetime.datetime.now(), null=False,
-        blank=False)
+        _('date created'), auto_now_add=True, null=False)
     date_modified = models.DateTimeField(
-        _('date modified'), default=models.datetime.datetime.now(),
-        null=False, blank=False)
-    timestamp_created = models.BigIntegerField(
-        _('timestamp created'), default = time.time()*1e6, null=False)
-    timestamp_modified = models.BigIntegerField(
-        _('timestamp modified'), default = time.time()*1e6, null=False)
+        _('date modified'), auto_now=True, null=False)
     is_dirty = models.BooleanField(default=True)
     parent = models.ForeignKey('self', null=True, blank=True)
     oerp_id = models.PositiveIntegerField(
@@ -102,12 +84,7 @@ class DeletedObjMapper(models.Model):
     content_type = models.ForeignKey(ContentType, verbose_name='Content Type')
     oerp_model = models.CharField(max_length=128, verbose_name='OpenERP Model')
 
-    def save(self, *args, **kwargs):
-        ''' Update timestamp '''
-        if not self.id:
-            self.timestamp_created = time.time()*1e6
-        self.timestamp_modified = time.time()*1e6
-        super(DeletedObjMapper, self).save(*args, **kwargs)
+    sync_now = False
 
     class Meta:
         verbose_name = _('Deleted Object Mapper')

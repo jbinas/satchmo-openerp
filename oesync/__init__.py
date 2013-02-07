@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db.models.signals import pre_delete, post_save
 from oesync.signals import post_save_all
 from satchmo_store.shop.signals import order_success
@@ -33,6 +32,5 @@ map(_reg_signal(pre_delete, on_delete_obj_mapper), _objmap_models+_objmap_models
 map(_reg_signal(post_save, on_save_obj_mapper), _objmap_models)
 map(_reg_signal(post_save_all, on_save_obj_mapper), _objmap_models_inline)
 
-if settings.OPENERP_SETTINGS['ORDER_ACTION']:
-    #special order_success action
-    order_success.connect(on_order_success_mapper)
+#special order_success action
+order_success.connect(on_order_success_mapper)
